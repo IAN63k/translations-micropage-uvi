@@ -1,0 +1,42 @@
+{
+  "section1": {
+    "subtitle": "With you in mind",
+    "title": {
+      "line1": "we innovate",
+      "line2": "We innovate"
+    },
+    "cta": {
+      "discover": "EXPLORE FURTHER",
+      "reservations": "RESERVATIONS",
+      "primary": "CLICK"
+    }
+  },
+  "section2": {
+    "title": "Access your",
+    "small": "Academic Platforms",
+    "info": {
+      "line1": "Access your",
+      "line2": "Academic",
+      "line3": "Platforms",
+      "line4": "TUTORIALS"
+    },
+    "cta": {
+      "tools": "Tools"
+    }
+  },
+  "section3": {
+    "description": "<strong>Uniajc Virtual (UVI)</strong> offers you different ways, spaces, and tools for creation and guidance in the development of digital competence. An example of this is the <strong>base projects</strong> that are available to the educational community every semester, the <strong>Innovative projects</strong> that are spaces for co-creating experiences and new projects between internal and/or external departments. Here, you also find how to <strong>create Digital Learning Experiences</strong>.",
+    "cards": {
+      "title1": "Projects",
+      "title2": "Innovative Projects",
+      "title3": "Learning Experiences"
+    }
+  },
+  "section5": {
+    "description": "The current digital era and technology for education offer a wide range of tools that can enrich your teaching and learning experiences, available on different devices, which you can explore online. That's why UVI has a multitude of digital <strong>tools and audiovisual resources for you to discover</strong>. Exploring the vast digital world will provide you with valuable knowledge.",
+    "cards": {
+      "tools": "Tools",
+      "repository": "Repository"
+    }
+  }
+}

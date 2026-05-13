@@ -1,0 +1,42 @@
+{
+  "section1": {
+    "subtitle": "Pensando en ti",
+    "title": {
+      "line1": "innovamos",
+      "line2": "We innovate"
+    },
+    "cta": {
+      "discover": "DESCUBRE MÁS",
+      "reservations": "RESERVAS",
+      "primary": "PÚLSAME"
+    }
+  },
+  "section2": {
+    "title": "Accede a tus",
+    "small": "Plataformas Académicas",
+    "info": {
+      "line1": "Accede a tus",
+      "line2": "Plataformas",
+      "line3": "Académicas",
+      "line4": "TUTORIALES"
+    },
+    "cta": {
+      "tools": "Herramientas"
+    }
+  },
+  "section3": {
+    "description": "<strong>Uniajc Virtual (UVI)</strong> te ofrece diferentes formas, espacios y herramientas de creación y guía para el desarrollo de la competencia digital. Un ejemplo de ello, son los <strong>Proyectos base</strong> que están al servicio de la comunidad educativa cada semestre, los <strong>Innovatorios</strong> que son espacios de co-creación de experiencias y nuevos proyectos entre dependencias internas y/o externas. Aquí encuentras también como crear <strong>Experiencias Digitales de Aprendizaje</strong>.",
+    "cards": {
+      "title1": "Proyectos",
+      "title2": "Innovatorios",
+      "title3": "Experiencias de aprendizaje"
+    }
+  },
+  "section5": {
+    "description": "La era digital actual y la tecnología para la educación, ofrece una amplia gama de herramientas que pueden enriquecer tus experiencias de enseñanza aprendizaje, dispuestas en diferentes dispositivos, las puedes explorar en línea. Es por eso que UVI tiene para tí, una gran cantidad de <strong>herramientas digitales y recursos audio visuales, disponibles para descubrir</strong>. Explorar el vasto mundo digital te proporcionará valiosos conocimientos.",
+    "cards": {
+      "tools": "Herramientas",
+      "repository": "Catálogo RED"
+    }
+  }
+}

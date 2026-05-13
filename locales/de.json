@@ -1,0 +1,42 @@
+{
+  "section1": {
+    "subtitle": "Mit dir im Sinn",
+    "title": {
+      "line1": "wir innovieren",
+      "line2": "Wir innovieren"
+    },
+    "cta": {
+      "discover": "MEHR ERFAHREN",
+      "reservations": "RESERVIERUNGEN",
+      "primary": "KLICKEN"
+    }
+  },
+  "section2": {
+    "title": "Greifen Sie auf Ihre zu",
+    "small": "Akademische Plattformen",
+    "info": {
+      "line1": "Greifen Sie auf Ihre zu",
+      "line2": "Akademische",
+      "line3": "Plattformen",
+      "line4": "ANLEITUNGEN"
+    },
+    "cta": {
+      "tools": "Werkzeuge"
+    }
+  },
+  "section3": {
+    "description": "<strong>Uniajc Virtual (UVI)</strong> bietet dir verschiedene Wege, Räume und Werkzeuge für die Erstellung und Anleitung in der Entwicklung digitaler Kompetenzen. Ein Beispiel dafür sind die <strong>Basisprojekte</strong>, die der Bildungsgemeinschaft jedes Semester zur Verfügung stehen, die <strong>innovativen Projekte</strong>, die Räume für die Co-Kreation von Erfahrungen und neuen Projekten zwischen internen und/oder externen Abteilungen sind. Hier finden Sie auch, wie Sie <strong>digitale Lernerfahrungen erstellen</strong>.",
+    "cards": {
+      "title1": "Projekte",
+      "title2": "Innovative Projekte",
+      "title3": "Lernerfahrungen"
+    }
+  },
+  "section5": {
+    "description": "Das aktuelle digitale Zeitalter und die Technologie für die Bildung bieten eine Vielzahl von Tools, die Ihre Lehr- und Lernmöglichkeiten bereichern können, verfügbar auf verschiedenen Geräten, die Sie online erkunden können. Deshalb hat UVI eine Vielzahl von <strong>digitalen Werkzeugen und audiovisuellen Ressourcen zu entdecken</strong>. Die Erkundung der riesigen digitalen Welt wird Ihnen wertvolles Wissen vermitteln.",
+    "cards": {
+      "tools": "Werkzeuge",
+      "repository": "Repository"
+    }
+  }
+}

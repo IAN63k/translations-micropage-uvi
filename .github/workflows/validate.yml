@@ -1,0 +1,110 @@
+name: Validate Translations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'locales/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'locales/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Validate JSON syntax
+        run: |
+          echo "🔍 Validando sintaxis JSON..."
+          for file in locales/*.json; do
+            echo "Revisando: $file"
+            python -m json.tool "$file" > /dev/null || (echo "❌ Error en $file" && exit 1)
+          done
+          echo "✅ Todos los JSONs son válidos"
+
+      - name: Check required keys
+        run: |
+          echo "🔑 Verificando claves requeridas..."
+          python3 << 'EOF'
+          import json
+          import sys
+          
+          # Claves requeridas en todos los idiomas
+          required_keys = [
+              "section1.subtitle",
+              "section1.title.line1",
+              "section1.title.line2",
+              "section1.cta.discover",
+              "section1.cta.reservations",
+              "section1.cta.primary",
+              "section2.title",
+              "section2.small",
+              "section2.info.line1",
+              "section2.info.line2",
+              "section2.info.line3",
+              "section2.info.line4",
+              "section2.cta.tools",
+              "section3.description",
+              "section3.cards.title1",
+              "section3.cards.title2",
+              "section3.cards.title3",
+              "section5.description",
+              "section5.cards.tools",
+              "section5.cards.repository"
+          ]
+          
+          def get_nested(obj, path):
+              """Obtener valor anidado usando notación de puntos"""
+              keys = path.split('.')
+              current = obj
+              for key in keys:
+                  if isinstance(current, dict):
+                      current = current.get(key)
+                  else:
+                      return None
+              return current
+          
+          languages = ['es', 'en', 'fr', 'de']
+          errors = []
+          
+          for lang in languages:
+              try:
+                  with open(f'locales/{lang}.json', 'r', encoding='utf-8') as f:
+                      data = json.load(f)
+                  
+                  for key in required_keys:
+                      value = get_nested(data, key)
+                      if value is None or value == "":
+                          errors.append(f"❌ {lang}.json: Clave '{key}' falta o está vacía")
+                      else:
+                          print(f"✅ {lang}.json: '{key}' OK")
+              except FileNotFoundError:
+                  errors.append(f"❌ locales/{lang}.json no encontrado")
+              except json.JSONDecodeError as e:
+                  errors.append(f"❌ {lang}.json: Error JSON - {e}")
+          
+          if errors:
+              print("\n🚨 Errores encontrados:")
+              for error in errors:
+                  print(error)
+              sys.exit(1)
+          else:
+              print("\n✅ Todas las claves requeridas están presentes en todos los idiomas")
+          EOF
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ Validación completada exitosamente"
+          echo "✅ Todos los JSONs tienen sintaxis válida"
+          echo "✅ Todas las claves requeridas están presentes"
