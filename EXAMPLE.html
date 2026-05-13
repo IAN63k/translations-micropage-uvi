@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UVI - Ejemplo de Integración i18n</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Botones de idioma */
+        .lang-switchers {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .lang-switchers span {
+            font-weight: 600;
+            color: #666;
+            margin-right: 12px;
+        }
+
+        [data-lang-switch] {
+            padding: 10px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        [data-lang-switch]:hover {
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        [data-lang-switch].active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Secciones */
+        section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .section-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .section-content strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 12px;
+            margin-top: 10px;
+        }
+
+        .cta-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card {
+            padding: 24px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 40px 0;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .info-box code {
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .section-title {
+                font-size: 24px;
+            }
+
+            .lang-switchers {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fallback embebido de traducciones -->
+    <script type="application/json" id="translations-fallback">
+    {
+      "es": {
+        "section1.subtitle": "Pensando en ti",
+        "section1.title.line1": "innovamos",
+        "section1.title.line2": "Juntos creamos",
+        "section1.cta.discover": "DESCUBRE MÁS",
+        "section1.cta.reservations": "RESERVAS",
+        "section1.cta.primary": "ACCEDER",
+        "section2.title": "Accede a tus",
+        "section2.small": "Plataformas Académicas",
+        "section2.info.line1": "Accede a tus",
+        "section2.info.line2": "Plataformas",
+        "section2.info.line3": "Académicas",
+        "section2.info.line4": "TUTORIALES",
+        "section2.cta.tools": "Herramientas",
+        "section3.description": "<strong>Uniajc Virtual (UVI)</strong> te ofrece diferentes formas, espacios y herramientas de creación y guía para el desarrollo de la competencia digital. Un ejemplo de ello, son los <strong>Proyectos base</strong> que están al servicio de la comunidad educativa cada semestre.",
+        "section3.cards.title1": "Proyectos",
+        "section3.cards.title2": "Innovatorios",
+        "section3.cards.title3": "Experiencias",
+        "section5.description": "La era digital actual y la tecnología para la educación, ofrece una amplia gama de <strong>herramientas digitales y recursos disponibles para descubrir</strong>. Explorar el vasto mundo digital te proporcionará valiosos conocimientos.",
+        "section5.cards.tools": "Herramientas",
+        "section5.cards.repository": "Catálogo RED"
+      },
+      "en": {
+        "section1.subtitle": "With you in mind",
+        "section1.title.line1": "we innovate",
+        "section1.title.line2": "Together we create",
+        "section1.cta.discover": "EXPLORE FURTHER",
+        "section1.cta.reservations": "RESERVATIONS",
+        "section1.cta.primary": "ACCESS",
+        "section2.title": "Access your",
+        "section2.small": "Academic Platforms",
+        "section2.info.line1": "Access your",
+        "section2.info.line2": "Academic",
+        "section2.info.line3": "Platforms",
+        "section2.info.line4": "TUTORIALS",
+        "section2.cta.tools": "Tools",
+        "section3.description": "<strong>Uniajc Virtual (UVI)</strong> offers you different ways, spaces, and tools for creation and guidance in the development of digital competence. An example of this is the <strong>base projects</strong> available to the educational community every semester.",
+        "section3.cards.title1": "Projects",
+        "section3.cards.title2": "Innovative Projects",
+        "section3.cards.title3": "Experiences",
+        "section5.description": "The current digital era and technology for education offer a wide range of <strong>digital tools and resources available for you to discover</strong>. Exploring the vast digital world will provide you with valuable knowledge.",
+        "section5.cards.tools": "Tools",
+        "section5.cards.repository": "Repository"
+      },
+      "fr": {
+        "section1.subtitle": "En pensant à toi",
+        "section1.title.line1": "nous innovons",
+        "section1.title.line2": "Ensemble, nous créons",
+        "section1.cta.discover": "DÉCOUVREZ PLUS",
+        "section1.cta.reservations": "RÉSERVATIONS",
+        "section1.cta.primary": "ACCÉDER",
+        "section2.title": "Accédez à vos",
+        "section2.small": "Plateformes Académiques",
+        "section2.info.line1": "Accédez à vos",
+        "section2.info.line2": "Plateformes",
+        "section2.info.line3": "Académiques",
+        "section2.info.line4": "TUTORIELS",
+        "section2.cta.tools": "Outils",
+        "section3.description": "<strong>Uniajc Virtual (UVI)</strong> vous propose différentes façons, espaces et outils de création et de guidance pour le développement de la compétence numérique. Un exemple en est les <strong>projets de base</strong> au service de la communauté éducative chaque semestre.",
+        "section3.cards.title1": "Projets",
+        "section3.cards.title2": "Projets Innovants",
+        "section3.cards.title3": "Expériences",
+        "section5.description": "L'ère numérique actuelle et la technologie pour l'éducation offrent un large éventail d'<strong>outils numériques et de ressources à découvrir</strong>. Explorer le vaste monde numérique vous fournira des connaissances précieuses.",
+        "section5.cards.tools": "Outils",
+        "section5.cards.repository": "Catalogue RED"
+      },
+      "de": {
+        "section1.subtitle": "Mit dir im Sinn",
+        "section1.title.line1": "innovieren wir",
+        "section1.title.line2": "Zusammen schaffen wir",
+        "section1.cta.discover": "MEHR ENTDECKEN",
+        "section1.cta.reservations": "RESERVIERUNGEN",
+        "section1.cta.primary": "ZUGREIFEN",
+        "section2.title": "Greifen Sie auf Ihre zu",
+        "section2.small": "Akademische Plattformen",
+        "section2.info.line1": "Greifen Sie auf Ihre zu",
+        "section2.info.line2": "Akademische",
+        "section2.info.line3": "Plattformen",
+        "section2.info.line4": "TUTORIALS",
+        "section2.cta.tools": "Werkzeuge",
+        "section3.description": "<strong>Uniajc Virtual (UVI)</strong> bietet dir verschiedene Wege, Räume und Werkzeuge zur Erstellung und Anleitung zur Entwicklung digitaler Kompetenzen. Ein Beispiel dafür sind die <strong>Basisprojekte</strong>, die jedes Semester der Bildungsgemeinschaft zur Verfügung stehen.",
+        "section3.cards.title1": "Projekte",
+        "section3.cards.title2": "Innovative Projekte",
+        "section3.cards.title3": "Erfahrungen",
+        "section5.description": "Die heutige digitale Ära und die Technologie für die Bildung bieten eine Vielzahl von <strong>digitalen Tools und Ressourcen zu entdecken</strong>. Die Erkundung der riesigen digitalen Welt wird dir wertvolles Wissen vermitteln.",
+        "section5.cards.tools": "Werkzeuge",
+        "section5.cards.repository": "Katalog RED"
+      }
+    }
+    </script>
+
+    <div class="container">
+        <!-- Header con botones de idioma -->
+        <header>
+            <div class="logo">UVI - Demo i18n</div>
+            <div class="lang-switchers">
+                <span>🌍 Idioma:</span>
+                <button data-lang-switch="es" title="Español">ES</button>
+                <button data-lang-switch="en" title="English">EN</button>
+                <button data-lang-switch="fr" title="Français">FR</button>
+                <button data-lang-switch="de" title="Deutsch">DE</button>
+            </div>
+        </header>
+
+        <!-- Sección 1: Hero -->
+        <section id="section1">
+            <p class="section-subtitle" data-i18n="section1.subtitle"></p>
+            <h1 class="section-title">
+                <span data-i18n="section1.title.line1"></span>
+                <br>
+                <span data-i18n="section1.title.line2"></span>
+            </h1>
+            <div>
+                <button class="cta-button" data-i18n="section1.cta.discover"></button>
+                <button class="cta-button" data-i18n="section1.cta.reservations"></button>
+                <button class="cta-button" data-i18n="section1.cta.primary"></button>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Sección 2: Acceso -->
+        <section id="section2">
+            <h2 class="section-title" data-i18n="section2.title"></h2>
+            <p class="section-subtitle" data-i18n="section2.small"></p>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-title" data-i18n="section2.info.line1"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" data-i18n="section2.info.line2"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" data-i18n="section2.info.line3"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" data-i18n="section2.info.line4"></div>
+                </div>
+            </div>
+            <p style="margin-top: 20px;">
+                <button class="cta-button" data-i18n="section2.cta.tools"></button>
+            </p>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Sección 3: Descripción (con HTML) -->
+        <section id="section3">
+            <p class="section-content" data-i18n="section3.description" data-i18n-html="true"></p>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-title" data-i18n="section3.cards.title1"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" data-i18n="section3.cards.title2"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" data-i18n="section3.cards.title3"></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Info Box sobre el sistema -->
+        <div class="info-box">
+            <strong>ℹ️ Nota del desarrollador:</strong>
+            <p>Este ejemplo demuestra la integración del sistema i18n. Las traducciones se cargan desde <code>locales/*.json</code> en el repo GitHub. Los idiomas soportados son: ES, EN, FR, DE.</p>
+        </div>
+
+        <!-- Sección 5: Recursos (con HTML) -->
+        <section id="section5">
+            <p class="section-content" data-i18n="section5.description" data-i18n-html="true"></p>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-title" data-i18n="section5.cards.tools"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" data-i18n="section5.cards.repository"></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Sistema de traducciones i18n para UVI • Almacenado en GitHub • Actualizado dinámicamente</p>
+        </div>
+    </div>
+
+    <!-- Cargar el loader i18n (usa fallback si GitHub no responde) -->
+    <script src="https://raw.githubusercontent.com/IAN63k/translations-micropage-uvi/main/i18n-loader.js"></script>
+</body>
+</html>
