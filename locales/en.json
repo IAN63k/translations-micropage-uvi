@@ -2,29 +2,38 @@
   "section1": {
     "subtitle": "With you in mind",
     "title": {
-      "line1": "we innovate",
+      "line1": "innovamos",
       "line2": "We innovate"
     },
     "cta": {
-      "discover": "EXPLORE FURTHER",
+      "discover": "Discover who we are",
       "reservations": "RESERVATIONS",
       "primary": "CLICK"
+    },
+    "emails": {
+      "title": "UVI Email Addresses",
+      "direccion": "Management Area",
+      "pedagogica": "Pedagogical Area",
+      "diseno": "Design Area",
+      "tecnologia": "Technology Area"
     }
   },
   "section2": {
-    "title": "Access your",
-    "small": "Academic Platforms",
+    "support": "<strong>Customer service </strong>and support",
+    "realtime": "in <strong>real time</strong>",
     "info": {
       "line1": "Access your",
       "line2": "Academic",
       "line3": "Platforms",
       "line4": "TUTORIALS"
-    },
-    "cta": {
-      "tools": "Tools"
     }
   },
   "section3": {
+    "title": {
+      "create": "Create",
+      "with": "With",
+      "us": "Us"
+    },
     "description": "<strong>Uniajc Virtual (UVI)</strong> offers you different ways, spaces, and tools for creation and guidance in the development of digital competence. An example of this is the <strong>base projects</strong> that are available to the educational community every semester, the <strong>Innovative projects</strong> that are spaces for co-creating experiences and new projects between internal and/or external departments. Here, you also find how to <strong>create Digital Learning Experiences</strong>.",
     "cards": {
       "title1": "Projects",
@@ -33,6 +42,7 @@
     }
   },
   "section5": {
+    "title": "Discover",
     "description": "The current digital era and technology for education offer a wide range of tools that can enrich your teaching and learning experiences, available on different devices, which you can explore online. That's why UVI has a multitude of digital <strong>tools and audiovisual resources for you to discover</strong>. Exploring the vast digital world will provide you with valuable knowledge.",
     "cards": {
       "tools": "Tools",

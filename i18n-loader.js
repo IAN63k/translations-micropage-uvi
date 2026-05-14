@@ -1,299 +1,262 @@
 /**
- * I18n Translation Manager para WordPress
- * 
- * Carga traducciones desde un repositorio remoto (GitHub, etc.)
- * con caché en localStorage y fallback embebido.
- * 
- * Uso:
- * 1. Incluir este script en la página
- * 2. Llamar a: i18n.switchLanguage('es|en|fr|de')
- * 3. Los elementos con data-i18n="key.path" se actualizan automáticamente
+ * I18n Translation Manager - Micropage UVI
+ *
+ * Carga traducciones desde un repositorio remoto (GitHub) con caché en
+ * localStorage y fallback embebido. Pensado para integrarse en páginas
+ * WordPress sin dependencias externas.
+ *
+ * Uso mínimo:
+ *   <script src=".../i18n-loader.js"></script>
+ *   <p data-i18n="section1.subtitle"></p>
+ *   <p data-i18n="section3.description" data-i18n-html="true"></p>
+ *   <img data-i18n-attr="alt:section1.cta.discover" src="..." />
+ *   <button data-lang-switch="en">EN</button>
  */
+(function (global) {
+  'use strict';
 
-class I18nTranslationManager {
-  constructor(options = {}) {
-    this.repoUrl = options.repoUrl || 'https://raw.githubusercontent.com/tuusuario/translations-micropage-uvi/main';
-    this.currentLang = localStorage.getItem('wp_lang') || 'es';
-    this.translations = {};
-    this.elements = new Map();
-    this.cacheExpiry = options.cacheExpiry || 1000 * 60 * 60 * 24; // 24 horas
-    this.initialized = false;
-    this.availableLanguages = ['es', 'en', 'fr', 'de'];
-    
-    // Selector -> clave i18n mapping (fallback si no usa data-i18n)
-    this.selectorMap = options.selectorMap || {};
-  }
+  const DEFAULTS = {
+    repoUrl: 'https://raw.githubusercontent.com/IAN63k/translations-micropage-uvi/main',
+    availableLanguages: ['es', 'en', 'fr', 'de'],
+    defaultLanguage: 'es',
+    cacheKeyPrefix: 'i18n_',
+    cacheExpiry: 1000 * 60 * 60 * 24,
+    storageKey: 'wp_lang',
+    fallbackElementId: 'translations-fallback',
+    transitionClass: 'i18n-transition',
+    fetchTimeout: 5000
+  };
 
-  /**
-   * Construir URL para idioma específico
-   */
-  getTranslationUrl(lang) {
-    return `${this.repoUrl}/locales/${lang}.json`;
-  }
+  class I18nTranslationManager {
+    constructor(options = {}) {
+      this.config = Object.assign({}, DEFAULTS, options);
+      this.translations = {};
+      this.elements = new Map();
+      this.initialized = false;
+      this.currentLang = this._resolveInitialLanguage();
+    }
 
-  /**
-   * Obtener traducción en caché si es válida
-   */
-  getCachedTranslations(lang) {
-    const cached = localStorage.getItem(`i18n_${lang}`);
-    const timestamp = localStorage.getItem(`i18n_${lang}_time`);
-    
-    if (cached && timestamp) {
-      const age = Date.now() - parseInt(timestamp);
-      if (age < this.cacheExpiry) {
-        return JSON.parse(cached);
-      } else {
-        // Limpiar caché expirado
-        localStorage.removeItem(`i18n_${lang}`);
-        localStorage.removeItem(`i18n_${lang}_time`);
+    _resolveInitialLanguage() {
+      const stored = (() => {
+        try { return localStorage.getItem(this.config.storageKey); } catch { return null; }
+      })();
+      if (stored && this.config.availableLanguages.includes(stored)) return stored;
+      const browser = (navigator.language || '').slice(0, 2).toLowerCase();
+      if (this.config.availableLanguages.includes(browser)) return browser;
+      return this.config.defaultLanguage;
+    }
+
+    _cacheKey(lang) { return `${this.config.cacheKeyPrefix}${lang}`; }
+    _timeKey(lang) { return `${this.config.cacheKeyPrefix}${lang}_time`; }
+
+    _readCache(lang) {
+      try {
+        const raw = localStorage.getItem(this._cacheKey(lang));
+        const ts = localStorage.getItem(this._timeKey(lang));
+        if (!raw || !ts) return null;
+        if (Date.now() - parseInt(ts, 10) > this.config.cacheExpiry) {
+          this.clearCache(lang);
+          return null;
+        }
+        return JSON.parse(raw);
+      } catch { return null; }
+    }
+
+    _writeCache(lang, data) {
+      try {
+        localStorage.setItem(this._cacheKey(lang), JSON.stringify(data));
+        localStorage.setItem(this._timeKey(lang), Date.now().toString());
+      } catch (err) {
+        console.warn('[i18n] No se pudo escribir caché:', err);
       }
     }
-    return null;
-  }
 
-  /**
-   * Guardar traducciones en caché
-   */
-  setCachedTranslations(lang, data) {
-    try {
-      localStorage.setItem(`i18n_${lang}`, JSON.stringify(data));
-      localStorage.setItem(`i18n_${lang}_time`, Date.now().toString());
-    } catch (err) {
-      console.warn('No se pudo guardar caché en localStorage:', err);
+    _readFallback(lang) {
+      const el = document.getElementById(this.config.fallbackElementId);
+      if (!el) return null;
+      try {
+        const data = JSON.parse(el.textContent);
+        return data && data[lang] ? data[lang] : null;
+      } catch (err) {
+        console.error('[i18n] Fallback JSON inválido:', err);
+        return null;
+      }
     }
-  }
 
-  /**
-   * Cargar traducciones desde repo o caché
-   */
-  async loadTranslations(lang) {
-    try {
-      // Intentar desde caché primero
-      const cached = this.getCachedTranslations(lang);
+    async _fetchFromRepo(lang) {
+      const url = `${this.config.repoUrl}/locales/${lang}.json`;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), this.config.fetchTimeout);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async loadTranslations(lang) {
+      const cached = this._readCache(lang);
       if (cached) {
         this.translations = cached;
         return cached;
       }
-
-      // Descargar desde repo
-      const url = this.getTranslationUrl(lang);
-      const response = await fetch(url, {
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status} al cargar traducciones de ${lang}`);
+      try {
+        const data = await this._fetchFromRepo(lang);
+        this._writeCache(lang, data);
+        this.translations = data;
+        return data;
+      } catch (err) {
+        console.warn(`[i18n] Repo no disponible (${lang}), usando fallback:`, err.message);
+        const fb = this._readFallback(lang) || this._readFallback(this.config.defaultLanguage) || {};
+        this.translations = fb;
+        return fb;
       }
-
-      const data = await response.json();
-      this.setCachedTranslations(lang, data);
-      this.translations = data;
-      return data;
-
-    } catch (error) {
-      console.warn(`Error cargando traducciones desde repo (${lang}):`, error);
-      
-      // Fallback: traducciones embebidas
-      const fallbackScript = document.getElementById('translations-fallback');
-      if (fallbackScript) {
-        try {
-          const fallback = JSON.parse(fallbackScript.textContent);
-          this.translations = fallback[lang] || {};
-          return this.translations;
-        } catch (parseErr) {
-          console.error('Error parseando fallback JSON:', parseErr);
-        }
-      }
-      
-      return {};
     }
-  }
 
-  /**
-   * Obtener valor de traducción por clave (ej: "section1.subtitle")
-   */
-  get(key) {
-    if (!key) return '';
-    return key.split('.').reduce((obj, k) => obj?.[k], this.translations) || key;
-  }
-
-  /**
-   * Traducir un elemento específico
-   */
-  translateElement(element) {
-    const key = this.elements.get(element);
-    if (!key) return;
-    
-    const text = this.get(key);
-    const isHtml = element.getAttribute('data-i18n-html') === 'true';
-    const format = element.getAttribute('data-i18n-format');
-    
-    // Formato especial para letras separadas en h1s
-    if (format === 'letters') {
-      // Limpiar contenido pero mantener la estructura de contenedor
-      element.innerHTML = '';
-      
-      // Crear h1 para cada carácter
-      for (const char of text) {
-        if (char === ' ') {
-          // Saltar espacios, agregar un <p> vacío si es necesario (para .title-2)
-          const p = document.createElement('p');
-          element.appendChild(p);
-        } else {
-          const h1 = document.createElement('h1');
-          h1.textContent = char.toUpperCase();
-          element.appendChild(h1);
-        }
-      }
-    } else if (isHtml) {
-      element.innerHTML = text;
-    } else {
-      element.innerText = text;
+    /** Obtener valor por clave anidada ("a.b.c"). Si no existe, devuelve la clave. */
+    get(key) {
+      if (!key) return '';
+      const value = key.split('.').reduce((obj, k) => (obj == null ? undefined : obj[k]), this.translations);
+      return value == null ? key : value;
     }
-  }
 
-  /**
-   * Registrar un elemento individual
-   */
-  register(element, key) {
-    if (!element) return;
-    this.elements.set(element, key);
-    this.translateElement(element);
-  }
-
-  /**
-   * Registrar todos los elementos con data-i18n
-   */
-  registerElements() {
-    document.querySelectorAll('[data-i18n]').forEach(element => {
+    _applyToElement(element) {
       const key = element.getAttribute('data-i18n');
-      this.register(element, key);
-    });
-  }
+      if (key) {
+        const text = this.get(key);
+        const isHtml = element.getAttribute('data-i18n-html') === 'true';
+        if (isHtml) element.innerHTML = text;
+        else element.textContent = text;
+      }
 
-  /**
-   * Inicializar el sistema
-   */
-  async init() {
-    try {
+      const attrSpec = element.getAttribute('data-i18n-attr');
+      if (attrSpec) {
+        attrSpec.split(',').forEach(pair => {
+          const [attr, attrKey] = pair.split(':').map(s => s.trim());
+          if (attr && attrKey) element.setAttribute(attr, this.get(attrKey));
+        });
+      }
+    }
+
+    /** Indexar y traducir todos los elementos con data-i18n / data-i18n-attr. */
+    registerElements(root = document) {
+      const selector = '[data-i18n], [data-i18n-attr]';
+      root.querySelectorAll(selector).forEach(el => {
+        this.elements.set(el, true);
+        this._applyToElement(el);
+      });
+    }
+
+    /** Registrar un elemento ad-hoc (útil para nodos creados dinámicamente). */
+    register(element, key) {
+      if (!element) return;
+      if (key) element.setAttribute('data-i18n', key);
+      this.elements.set(element, true);
+      this._applyToElement(element);
+    }
+
+    async init() {
+      if (this.initialized) return;
       await this.loadTranslations(this.currentLang);
       this.registerElements();
       this.initialized = true;
-      this.emitEvent('i18nReady', { lang: this.currentLang });
-    } catch (err) {
-      console.error('Error inicializando i18n:', err);
-    }
-  }
-
-  /**
-   * Cambiar idioma globalmente
-   */
-  async switchLanguage(lang) {
-    if (!this.initialized) {
-      console.warn('i18n no inicializado. Llama a i18n.init() primero.');
-      return;
+      document.documentElement.setAttribute('lang', this.currentLang);
+      this._emit('i18nReady', { lang: this.currentLang });
     }
 
-    if (!this.availableLanguages.includes(lang)) {
-      console.warn(`Idioma "${lang}" no disponible. Opciones: ${this.availableLanguages.join(', ')}`);
-      return;
-    }
-
-    this.currentLang = lang;
-    localStorage.setItem('wp_lang', lang);
-    
-    // Cargar traducciones del nuevo idioma
-    await this.loadTranslations(lang);
-
-    // Actualizar todos los elementos
-    this.elements.forEach((key, element) => {
-      if (element && element.isConnected) { // Verificar que el elemento sigue en el DOM
-        this.translateElement(element);
-        
-        // Animación de cambio (fade-in)
-        if (element.classList) {
-          element.classList.add('i18n-transition');
-          setTimeout(() => element.classList.remove('i18n-transition'), 300);
-        }
+    async switchLanguage(lang) {
+      if (!this.config.availableLanguages.includes(lang)) {
+        console.warn(`[i18n] Idioma no disponible: ${lang}`);
+        return;
       }
-    });
+      if (lang === this.currentLang && this.initialized) return;
 
-    // Trigger evento personalizado
-    this.emitEvent('languageChanged', { lang });
-  }
+      this.currentLang = lang;
+      try { localStorage.setItem(this.config.storageKey, lang); } catch {}
+      document.documentElement.setAttribute('lang', lang);
 
-  /**
-   * Emitir evento personalizado
-   */
-  emitEvent(eventName, detail = {}) {
-    window.dispatchEvent(new CustomEvent(eventName, { detail }));
-  }
+      await this.loadTranslations(lang);
+      this.elements.forEach((_, el) => {
+        if (el && el.isConnected) {
+          this._applyToElement(el);
+          if (el.classList) {
+            el.classList.add(this.config.transitionClass);
+            setTimeout(() => el.classList.remove(this.config.transitionClass), 300);
+          }
+        }
+      });
 
-  /**
-   * Obtener idioma actual
-   */
-  getCurrentLang() {
-    return this.currentLang;
-  }
+      this._emit('languageChanged', { lang });
+    }
 
-  /**
-   * Obtener idiomas disponibles
-   */
-  getAvailableLanguages() {
-    return this.availableLanguages;
-  }
+    /** Alterna entre los dos primeros idiomas configurados (legacy toggle EN/ES). */
+    toggleLanguage() {
+      const [a, b] = this.config.availableLanguages;
+      return this.switchLanguage(this.currentLang === a ? b : a);
+    }
 
-  /**
-   * Invalidar caché manualmente
-   */
-  clearCache(lang = null) {
-    if (lang) {
-      localStorage.removeItem(`i18n_${lang}`);
-      localStorage.removeItem(`i18n_${lang}_time`);
-    } else {
-      this.availableLanguages.forEach(l => {
-        localStorage.removeItem(`i18n_${l}`);
-        localStorage.removeItem(`i18n_${l}_time`);
+    _emit(name, detail) {
+      window.dispatchEvent(new CustomEvent(name, { detail }));
+    }
+
+    getCurrentLang() { return this.currentLang; }
+    getAvailableLanguages() { return this.config.availableLanguages.slice(); }
+
+    clearCache(lang = null) {
+      const langs = lang ? [lang] : this.config.availableLanguages;
+      langs.forEach(l => {
+        try {
+          localStorage.removeItem(this._cacheKey(l));
+          localStorage.removeItem(this._timeKey(l));
+        } catch {}
       });
     }
   }
-}
 
-// Instancia global
-const i18n = new I18nTranslationManager({
-  repoUrl: 'https://raw.githubusercontent.com/tuusuario/translations-micropage-uvi/main'
-});
-
-// Inicializar cuando el DOM esté listo
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => i18n.init());
-} else {
-  i18n.init();
-}
-
-// Configurar botones de cambio de idioma
-window.setupLanguageSwitchers = function() {
-  document.querySelectorAll('[data-lang-switch]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const lang = btn.getAttribute('data-lang-switch');
-      i18n.switchLanguage(lang);
-      
-      // Actualizar estado visual de botones
-      document.querySelectorAll('[data-lang-switch]').forEach(b => {
-        b.classList.toggle('active', b === btn);
+  function bindSwitchers() {
+    document.querySelectorAll('[data-lang-switch]').forEach(btn => {
+      if (btn.dataset.i18nBound === '1') return;
+      btn.dataset.i18nBound = '1';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const lang = btn.getAttribute('data-lang-switch');
+        global.i18n.switchLanguage(lang);
       });
     });
-  });
-
-  // Marcar como activo el botón del idioma inicial
-  const activeBtn = document.querySelector(`[data-lang-switch="${i18n.getCurrentLang()}"]`);
-  if (activeBtn) activeBtn.classList.add('active');
-};
-
-// Llamar automáticamente si hay botones de idioma al cargar
-window.addEventListener('i18nReady', () => {
-  if (document.querySelector('[data-lang-switch]')) {
-    window.setupLanguageSwitchers();
+    document.querySelectorAll('[data-lang-toggle]').forEach(btn => {
+      if (btn.dataset.i18nBound === '1') return;
+      btn.dataset.i18nBound = '1';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        global.i18n.toggleLanguage();
+      });
+    });
   }
-});
+
+  function markActiveSwitchers(lang) {
+    document.querySelectorAll('[data-lang-switch]').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang-switch') === lang);
+    });
+  }
+
+  const instance = new I18nTranslationManager(global.I18N_CONFIG || {});
+  global.I18nTranslationManager = I18nTranslationManager;
+  global.i18n = instance;
+
+  const start = () => {
+    instance.init().then(() => {
+      bindSwitchers();
+      markActiveSwitchers(instance.getCurrentLang());
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+
+  window.addEventListener('languageChanged', (e) => markActiveSwitchers(e.detail.lang));
+})(window);

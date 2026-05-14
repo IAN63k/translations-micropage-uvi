@@ -6,25 +6,34 @@
       "line2": "Nous innovons"
     },
     "cta": {
-      "discover": "DÉCOUVREZ PLUS",
+      "discover": "Découvrez qui nous sommes",
       "reservations": "RÉSERVATIONS",
       "primary": "CLIQUEZ"
+    },
+    "emails": {
+      "title": "Courriels UVI",
+      "direccion": "Direction",
+      "pedagogica": "Pédagogie",
+      "diseno": "Design",
+      "tecnologia": "Technologie"
     }
   },
   "section2": {
-    "title": "Accédez à votre",
-    "small": "Plateformes académiques",
+    "support": "<strong>Service client</strong> et support",
+    "realtime": "en <strong>direct</strong>",
     "info": {
-      "line1": "Accédez à votre",
+      "line1": "Accédez à vos",
       "line2": "Plateformes",
       "line3": "académiques",
       "line4": "TUTORIELS"
-    },
-    "cta": {
-      "tools": "Outils"
     }
   },
   "section3": {
+    "title": {
+      "create": "Créer",
+      "with": "avec",
+      "us": "Nous"
+    },
     "description": "<strong>Uniajc Virtual (UVI)</strong> vous offre différentes façons, espaces et outils de création et de guidance dans le développement de la compétence numérique. Un exemple en est les <strong>projets de base</strong> qui sont à la disposition de la communauté éducative chaque semestre, les <strong>projets innovants</strong> qui sont des espaces de co-création d'expériences et de nouveaux projets entre départements internes et/ou externes. Ici, vous trouvez également comment <strong>créer des expériences d'apprentissage numérique</strong>.",
     "cards": {
       "title1": "Projets",
@@ -33,6 +42,7 @@
     }
   },
   "section5": {
+    "title": "Découvrir",
     "description": "L'ère numérique actuelle et la technologie pour l'éducation offrent une large gamme d'outils qui peuvent enrichir vos expériences d'enseignement et d'apprentissage, disponibles sur différents appareils, que vous pouvez explorer en ligne. C'est pourquoi UVI dispose d'une multitude d'<strong>outils numériques et de ressources audiovisuelles pour vous de découvrir</strong>. Explorer le vaste monde numérique vous fournira des connaissances précieuses.",
     "cards": {
       "tools": "Outils",
