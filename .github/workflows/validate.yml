@@ -39,7 +39,7 @@ jobs:
           import json
           import sys
           
-          # Claves requeridas en todos los idiomas
+          # Claves requeridas en todos los idiomas (esquema v2: alineado con data-i18n en index.html)
           required_keys = [
               "section1.subtitle",
               "section1.title.line1",
@@ -47,17 +47,25 @@ jobs:
               "section1.cta.discover",
               "section1.cta.reservations",
               "section1.cta.primary",
-              "section2.title",
-              "section2.small",
+              "section1.emails.title",
+              "section1.emails.direccion",
+              "section1.emails.pedagogica",
+              "section1.emails.diseno",
+              "section1.emails.tecnologia",
+              "section2.support",
+              "section2.realtime",
               "section2.info.line1",
               "section2.info.line2",
               "section2.info.line3",
               "section2.info.line4",
-              "section2.cta.tools",
+              "section3.title.create",
+              "section3.title.with",
+              "section3.title.us",
               "section3.description",
               "section3.cards.title1",
               "section3.cards.title2",
               "section3.cards.title3",
+              "section5.title",
               "section5.description",
               "section5.cards.tools",
               "section5.cards.repository"
