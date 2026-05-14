@@ -126,8 +126,26 @@ class I18nTranslationManager {
     
     const text = this.get(key);
     const isHtml = element.getAttribute('data-i18n-html') === 'true';
+    const format = element.getAttribute('data-i18n-format');
     
-    if (isHtml) {
+    // Formato especial para letras separadas en h1s
+    if (format === 'letters') {
+      // Limpiar contenido pero mantener la estructura de contenedor
+      element.innerHTML = '';
+      
+      // Crear h1 para cada carácter
+      for (const char of text) {
+        if (char === ' ') {
+          // Saltar espacios, agregar un <p> vacío si es necesario (para .title-2)
+          const p = document.createElement('p');
+          element.appendChild(p);
+        } else {
+          const h1 = document.createElement('h1');
+          h1.textContent = char.toUpperCase();
+          element.appendChild(h1);
+        }
+      }
+    } else if (isHtml) {
       element.innerHTML = text;
     } else {
       element.innerText = text;
